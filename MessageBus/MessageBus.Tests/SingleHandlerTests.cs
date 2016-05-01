@@ -5,7 +5,7 @@ using System.Linq;
 namespace MessageBus.Tests
 {
     [TestClass]
-    public class UnitTests
+    public class SingleHandlerTests
     {
         [TestMethod]
         public void will_publish_once_to_single_handler()
@@ -43,6 +43,25 @@ namespace MessageBus.Tests
             //Assert
             Assert.AreEqual(5, ping_handler.logger.messages.Count());
         }
+
+        [TestMethod]
+        public void will_publish_to_many_single_handlers()
+        {
+            //Arrange
+            var ping_handler = new PingHandler();
+            var ping_handler2 = new PingHandler();
+
+            Bus.Instance.Register(ping_handler);
+            Bus.Instance.Register(ping_handler2);
+
+            //Act            
+            Bus.Instance.SendMessage(new Ping());
+
+            //Assert
+            Assert.AreEqual(1, ping_handler.logger.messages.Count());
+            Assert.AreEqual(1, ping_handler2.logger.messages.Count());
+        }
+
 
         [TestMethod]
         public void will_publish_only_to_registered_single_handler()

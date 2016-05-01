@@ -51,7 +51,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="fixture.cs" />
-    <Compile Include="UnitTests.cs" />
+    <Compile Include="NHandlerTests.cs" />
+    <Compile Include="SingleHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
