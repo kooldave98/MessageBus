@@ -1,15 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MessageBus.Core
 {
     public sealed class Bus
     {
         private Dictionary<Type, HashSet<object>> message_type_to_handlers = new Dictionary<Type, HashSet<object>>();
-        public void SendMessage<T>(T message) where T : IMessage
-        {
 
+        public Task SendMessageAsync<T>(T message) where T : IMessage
+        {
+            return
+                Task.Run(()=> {
+                    SendMessage(message);
+                });            
+        }
+
+        public void SendMessage<T>(T message) where T : IMessage
+        { 
             var entry = message_type_to_handlers.SingleOrDefault(i => i.Key == typeof(T));
 
             if (entry.Key == null && entry.Value == null)
@@ -19,7 +28,14 @@ namespace MessageBus.Core
 
             foreach (dynamic item in entry.Value)
             {
-                item.handle(message);
+                try
+                {
+                    item.handle(message);
+                }
+                catch(Exception)
+                {
+                    //What do we do here now ? :/
+                }
             }
         }
 
