@@ -6,11 +6,11 @@ namespace MessageBus.Core
 {
     public sealed class Bus
     {
-        private Dictionary<Type, HashSet<object>> message_to_handlers = new Dictionary<Type, HashSet<object>>();
+        private Dictionary<Type, HashSet<object>> message_type_to_handlers = new Dictionary<Type, HashSet<object>>();
         public void SendMessage<T>(T message) where T : IMessage
         {
 
-            var entry = message_to_handlers.SingleOrDefault(i => i.Key == typeof(T));
+            var entry = message_type_to_handlers.SingleOrDefault(i => i.Key == typeof(T));
 
             if (entry.Key == null && entry.Value == null)
             {
@@ -29,13 +29,18 @@ namespace MessageBus.Core
 
             foreach (dynamic item in interfaces)
             {
-                if (message_to_handlers.ContainsKey(item.message_type))
+                var hashset =
+                message_type_to_handlers
+                    .SingleOrDefault(mh => mh.Key == item.message_type)
+                    .Value;
+
+                if (hashset == null)
                 {
-                    message_to_handlers[item.message_type].Add(item.handler);
+                    message_type_to_handlers.Add(item.message_type, new HashSet<object>() { item.handler });
                 }
                 else
                 {
-                    message_to_handlers.Add(item.message_type, new HashSet<object>() { item.handler });
+                    hashset.Add(item.handler);
                 }
             }
         }
@@ -46,12 +51,10 @@ namespace MessageBus.Core
 
             foreach (dynamic item in interfaces)
             {
-                if (!message_to_handlers.ContainsKey(item.message_type))
-                {
-                    return;
-                }
-
-                message_to_handlers[item.message_type].Remove(item.handler);
+                message_type_to_handlers
+                    .SingleOrDefault(mh=>mh.Key == item.message_type)
+                    .Value?
+                    .Remove(item.handler);
             }
         }
 

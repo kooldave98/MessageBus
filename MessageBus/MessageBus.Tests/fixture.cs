@@ -1,4 +1,5 @@
 ﻿using MessageBus.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,25 +9,38 @@ namespace MessageBus.Tests
     {
         public void handle(Ping message)
         {
-            logger.add(message);
+            handle_callback(message);
         }
 
-        public readonly MessageLogger logger = new MessageLogger();
+        public PingHandler(Action<Ping> the_handle_callback)
+        {
+            handle_callback = the_handle_callback;
+        }
+
+        private Action<Ping> handle_callback;
     }
 
     public class PingPongHandler : IMessageHandler<Ping>, IMessageHandler<Pong>
     {
         public void handle(Ping message)
         {
-            logger.add(message);
+            ping_handle_callback(message);
         }
 
         public void handle(Pong message)
         {
-            logger.add(message);
+            pong_handle_callback(message);
         }
 
-        public readonly MessageLogger logger = new MessageLogger();
+        public PingPongHandler(Action<Ping> the_ping_handle_callback
+                             , Action<Pong> the_pong_handle_callback)
+        {
+            ping_handle_callback = the_ping_handle_callback;
+            pong_handle_callback = the_pong_handle_callback;
+        }
+
+        private Action<Ping> ping_handle_callback;
+        private Action<Pong> pong_handle_callback;
     }
 
     public sealed class MessageLogger
